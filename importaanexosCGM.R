@@ -4,26 +4,28 @@
 library(stringr)
 library(dplyr)
 library(archive)
+library(janitor) # versão dev github 1.6
 
 
 
 remove_acento <- function(vec, Toupper=F) {
   vec <- tolower(vec)
-  vec <- gsub('?', 'a', vec)
-  vec <- gsub('?', 'a', vec)
-  vec <- gsub('?', 'a', vec)
-  vec <- gsub('?', 'a', vec)
-  vec <- gsub('?', 'e', vec)
-  vec <- gsub('?', 'e', vec)
-  vec <- gsub('?', 'i', vec)
-  vec <- gsub('?', 'o', vec)
-  vec <- gsub('?', 'o', vec)
-  vec <- gsub('?', 'o', vec)
-  vec <- gsub('?', 'u', vec)
-  vec <- gsub('?', 'c', vec)
-  vec <- gsub("'", '', vec)
-  vec <- gsub("`", '', vec)
-  #  vec <- gsub('\'', '', vec)
+  vec <- vec %>%
+    gsub('à', 'a', .) %>%
+    gsub('á', 'a', vec) %>%
+    gsub('â', 'a', vec) %>%
+    gsub('ã', 'a', vec) %>%
+    gsub('é', 'e', vec) %>%
+    gsub('ê', 'e', vec) %>%
+    gsub('í', 'i', vec) %>%
+    gsub('ó', 'o', vec) %>%
+    gsub('ô', 'o', vec) %>%
+    gsub('õ', 'o', vec) %>%
+    gsub('ú', 'u', vec) %>%
+    gsub('ç', 'c', vec) %>% 
+    gsub("'", '', vec) %>%
+    gsub("`", '', vec)
+  #  gsub('\'', '', vec)
   if ( Toupper==T) vec <- toupper(vec)
   return(vec)
 }
