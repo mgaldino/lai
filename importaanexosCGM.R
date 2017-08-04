@@ -12,20 +12,20 @@ remove_acento <- function(vec, Toupper=F) {
   vec <- tolower(vec)
   vec <- vec %>%
     gsub('à', 'a', .) %>%
-    gsub('á', 'a', vec) %>%
-    gsub('â', 'a', vec) %>%
-    gsub('ã', 'a', vec) %>%
-    gsub('é', 'e', vec) %>%
-    gsub('ê', 'e', vec) %>%
-    gsub('í', 'i', vec) %>%
-    gsub('ó', 'o', vec) %>%
-    gsub('ô', 'o', vec) %>%
-    gsub('õ', 'o', vec) %>%
-    gsub('ú', 'u', vec) %>%
-    gsub('ç', 'c', vec) %>% 
-    gsub("'", '', vec) %>%
-    gsub("`", '', vec)
-  #  gsub('\'', '', vec)
+    gsub('á', 'a', .) %>%
+    gsub('â', 'a', .) %>%
+    gsub('ã', 'a', .) %>%
+    gsub('é', 'e', .) %>%
+    gsub('ê', 'e', .) %>%
+    gsub('í', 'i', .) %>%
+    gsub('ó', 'o', .) %>%
+    gsub('ô', 'o', .) %>%
+    gsub('õ', 'o', .) %>%
+    gsub('ú', 'u', .) %>%
+    gsub('ç', 'c', .) %>% 
+    gsub("'", '', .) %>%
+    gsub("`", '', .)
+  #  gsub('\'', '', .)
   if ( Toupper==T) vec <- toupper(vec)
   return(vec)
 }
