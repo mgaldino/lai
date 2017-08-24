@@ -23,14 +23,6 @@ recursos <- fread("recursos_v2.txt") %>%
 cgu <- fread("editada para template.txt") %>%
   clean_names()
 
-abraji <- abraji %>%
-  mutate(tipo = "pedido") %>%
-  left_join(dplyr::select(cgu_pedidos1, IdPedido, FoiProrrogado, ProtocoloPedido, DataHoraResposta, Resposta),
-            by = c("Protocolo" = "ProtocoloPedido")) %>%
-  left_join(dplyr::select(recursos, IdPedido, ProtocoloPedido, Instancia, DescRecurso, DataRegistro,RespostaRecurso, DataResposta),
-            by = "IdPedido")
-
-
 # Título da Solicitação # repete
 # descricao_do_pedido -> Resposta e -> DescRecurso e -> RespostaRecurso
 # data_de_abertura -> DataHoraResposta & DataRegistro e -> DataResposta
@@ -47,12 +39,14 @@ abraji <- abraji %>%
 # Name por interação, e separado por ";"
 
 abraji1 <- abraji %>%
-  dplyr::select(protocolo, titulo_da_solicitacao, descricao_do_pedido,
+  dplyr::select(protocolo, titulo_da_solicitacao, descricao_do_pedido,tipodeinteracao,
                  data_de_abertura, foi_prorrogado, orgao, status, uf, municipio, esfera,
                poder) %>%
   rename(data = data_de_abertura) %>%
-  mutate(tipo_de_interacao = "pedido",
-         idpedido = NA)
+  filter(tipodeinteracao %in% c("Pedido", "Reclamação")) %>%
+  mutate(tipo_de_interacao = ifelse(tipodeinteracao == "Pedido", "pedido", "reclamação"),
+         idpedido = NA) %>%
+  select(-tipodeinteracao)
 
 ## preparando respostas para rbind
 
@@ -100,8 +94,7 @@ recursos4 <- recursos3 %>%
          uf = NA,
          municipio = NA,
          esfera = NA,
-         poder = NA,
-  ) %>%
+         poder = NA ) %>%
   dplyr::select(protocolopedido, titulo_da_solicitacao, descricao_do_pedido,
                 data, foi_prorrogado, orgao, status, uf, 
                 municipio, esfera, poder, tipo_de_interacao , idpedido) %>%
@@ -122,14 +115,36 @@ abraji_final <- bind_rows(abraji1, cgu_pedidos2, recursos4) %>%
                   uf = max(uf, na.rm=T),
                   municipio = max(municipio, na.rm=T),
                   esfera = max(esfera, na.rm=T),
-                  poder = max(poder, na.rm=T))
+                  poder = max(poder, na.rm=T)) %>%
+  ungroup()
 
-valid <- abraji_final %>%
-  filter(poder != "Federal")
+#3 limpando -Inf
+  abraji_final <- abraji_final %>%
+  mutate(titulo_da_solicitacao = ifelse(titulo_da_solicitacao == -Inf, NA, titulo_da_solicitacao),
+         foi_prorrogado = ifelse(foi_prorrogado == -Inf, NA, foi_prorrogado),
+         orgao = ifelse(orgao == -Inf, NA, orgao),
+         status = ifelse(status == -Inf, NA, status),
+         uf = ifelse(uf == -Inf, NA, uf),
+         municipio = ifelse(municipio == -Inf, NA, municipio),
+         esfera = ifelse(esfera == -Inf, NA, esfera),
+         poder = ifelse(poder == -Inf, NA, poder))
 
-valid1 <- abraji %>%
-  filter(protocolo == "2680000866201791")
+# última parte do path de folder_path repete, se não tiver anexo é missing
+# Name por interação, e separado por ";"
+
+cgu1 <- cgu %>%
+  mutate(pasta = basename(folder_path)) %>%
+  group_by(protocolo) %>%
+  mutate(nome_arquivo = paste(name, ";", collapse = ""),
+         aux = n()) %>%
+  ungroup() %>%
+  mutate(nome_arquivo1 = substr(nome_arquivo, 1, nchar(nome_arquivo)-1)) %>%
+  distinct(protocolo, .keep_all = T)
+
+abraji_final <- abraji_final %>%
+  left_join(dplyr::select(cgu1, protocolo, nome_arquivo1, pasta), by="protocolo") 
 
 abraji_final %>%
-  summarise(num_pedidos = n_distinct(protocolo),
-            num_)
+  summarise(n(), n_distinct(protocolo))
+
+write.table(abraji_final, file="abraji_final.csv", sep=";", row.names=F)
