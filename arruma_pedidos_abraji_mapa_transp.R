@@ -4,11 +4,11 @@ library(tidyverse)
 library(data.table)
 library(janitor)
 
-abraji <- fread("Abraji_versao_renata.csv") %>%
+abraji <- fread("Abraji_versao_renata.csv", colClasses = "character") %>%
   clean_names()
 head(abraji)
 
-cgu_pedidos <- fread("cgu_pedido.txt", verbose=T) %>%
+cgu_pedidos <- fread("cgu_pedido.txt", colClasses = "character") %>%
   clean_names()
 
 # algumas linhas deram problema
@@ -17,10 +17,10 @@ cgu_pedidos1 <- cgu_pedidos %>%
   filter(!idpedido %in%  c(538347, 538351, 538355)) %>%
   mutate(tipo1 = "resposta")
 
-recursos <- fread("recursos_v2.txt") %>%
+recursos <- fread("recursos_v2.txt", colClasses = "character") %>%
   clean_names()
 
-cgu <- fread("editada para template.txt") %>%
+cgu <- fread("editada para template.txt", colClasses = "character") %>%
   clean_names()
 
 # Título da Solicitação # repete
@@ -106,7 +106,7 @@ abraji_aux <- abraji %>%
   mutate(aux = "sim")
 
 abraji_final <- bind_rows(abraji1, cgu_pedidos2, recursos4) %>%
-  inner_join(abraji_aux, by="protocolo") %>%
+  # inner_join(abraji_aux, by="protocolo") %>%
   group_by(protocolo) %>%
   mutate(titulo_da_solicitacao = max(titulo_da_solicitacao, na.rm=T),
                   foi_prorrogado = max(foi_prorrogado, na.rm=T),
@@ -148,3 +148,15 @@ abraji_final %>%
   summarise(n(), n_distinct(protocolo))
 
 write.table(abraji_final, file="abraji_final.csv", sep=";", row.names=F)
+
+
+## validação
+
+valid <- abraji_final %>%
+  filter(protocolo == '02680000861201768')
+
+View(valid)
+
+valid1 <- abraji %>%
+  filter(protocolo == '02680000861201768')
+View(valid1)
