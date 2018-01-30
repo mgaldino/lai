@@ -6,7 +6,6 @@ library(magrittr)
 library(RMySQL)
 
 
-
 setwd("C:/Users/mgaldino/2017/Ford/AchadosePedidos/lai/CGU/20180129_Arquivos_csv_2017")
 
 # carrega cabeçalho do banco
@@ -19,19 +18,8 @@ cgu1 <- fread("20180129_Pedidos_csv_2017_utf8.txt", encoding = "UTF-8")
 cgu1 <- cgu1 %>%
   set_colnames(as.character(nome$nome))
 
-
-ucscDb <- dbConnect(RMySQL::MySQL(),
-                    user="tblaistage", 
-                    groups = "mysql",
-                    password="Cl$x@T4b9",
-                    host="104.197.226.92",
-                    port = 3306,
-                    dbname = "tblai")
-
-
-agentes <- dbGetQuery(ucscDb, "SELECT * 
-                      FROM agentes where CodigoPoder = 2 and CodigoNivelFederativo = 1")
-
+save(agentes, file="agentes.RData")
+load("agentes.RData")
 head(agentes)
 
 
